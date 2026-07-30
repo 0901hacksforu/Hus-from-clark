@@ -1,342 +1,183 @@
--- Hitbox Changer GUI
 -- Made by Kevvscripts
--- Discord: https://discord.com/invite/CWYQqnEMh
+print("Made by Kevvscripts")
 
 local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
-local Humanoid = Character:WaitForChild("Humanoid")
-local Mouse = Player:GetMouse()
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
 -- Create ScreenGui
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HitboxChangerGUI"
-ScreenGui.Parent = Player:WaitForChild("PlayerGui")
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "FuturisticHitboxGUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
--- Main Frame (Futuristic Glass Effect)
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 350, 0, 480)
-MainFrame.Position = UDim2.new(0.5, -175, 0.5, -240)
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 20, 40)
-MainFrame.BackgroundTransparency = 0.15
-MainFrame.BorderSizePixel = 0
-MainFrame.Parent = ScreenGui
+-- Main Frame (Futuristic Dark/Cyan Theme)
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 320, 0, 380)
+mainFrame.Position = UDim2.new(0.5, -160, 0.5, -190)
+mainFrame.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
 
--- Glassmorphism effect
-local Corner = Instance.new("UICorner")
-Corner.CornerRadius = UDim.new(0, 20)
-Corner.Parent = MainFrame
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = mainFrame
 
-local Stroke = Instance.new("UIStroke")
-Stroke.Color = Color3.fromRGB(0, 180, 255)
-Stroke.Thickness = 2
-Stroke.Transparency = 0.5
-Stroke.Parent = MainFrame
-
--- Glow background
-local Glow = Instance.new("Frame")
-Glow.Size = UDim2.new(1, 10, 1, 10)
-Glow.Position = UDim2.new(0, -5, 0, -5)
-Glow.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
-Glow.BackgroundTransparency = 0.8
-Glow.BorderSizePixel = 0
-Glow.Parent = MainFrame
-local GlowCorner = Instance.new("UICorner")
-GlowCorner.CornerRadius = UDim.new(0, 25)
-GlowCorner.Parent = Glow
+local uiStroke = Instance.new("UIStroke")
+uiStroke.Color = Color3.fromRGB(0, 255, 204)
+uiStroke.Thickness = 2
+uiStroke.Parent = mainFrame
 
 -- Title
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.Position = UDim2.new(0, 0, 0, 10)
-Title.BackgroundTransparency = 1
-Title.Text = "⚡ HITBOX CONTROLLER ⚡"
-Title.TextColor3 = Color3.fromRGB(0, 200, 255)
-Title.TextScaled = true
-Title.Font = Enum.Font.GothamBold
-Title.Parent = MainFrame
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 50)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.Code
+title.Text = "SYSTEM // HITBOX"
+title.TextColor3 = Color3.fromRGB(0, 255, 204)
+title.TextSize = 20
+title.Parent = mainFrame
 
--- Made by Kevvscripts (appears on load)
-local CreditLabel = Instance.new("TextLabel")
-CreditLabel.Size = UDim2.new(1, 0, 0, 30)
-CreditLabel.Position = UDim2.new(0, 0, 0, 60)
-CreditLabel.BackgroundTransparency = 1
-CreditLabel.Text = "Made by Kevvscripts"
-CreditLabel.TextColor3 = Color3.fromRGB(100, 200, 255)
-CreditLabel.TextScaled = true
-CreditLabel.Font = Enum.Font.GothamMedium
-CreditLabel.Parent = MainFrame
+-- Value Display
+local valueDisplay = Instance.new("TextLabel")
+valueDisplay.Size = UDim2.new(1, 0, 0, 30)
+valueDisplay.Position = UDim2.new(0, 0, 0, 60)
+valueDisplay.BackgroundTransparency = 1
+valueDisplay.Font = Enum.Font.Code
+valueDisplay.Text = "Hitbox Size: 2.0"
+valueDisplay.TextColor3 = Color3.fromRGB(150, 200, 255)
+valueDisplay.TextSize = 16
+valueDisplay.Parent = mainFrame
 
--- Discord Button
-local DiscordButton = Instance.new("TextButton")
-DiscordButton.Size = UDim2.new(0.8, 0, 0, 40)
-DiscordButton.Position = UDim2.new(0.1, 0, 0, 95)
-DiscordButton.BackgroundColor3 = Color3.fromRGB(88, 101, 242)
-DiscordButton.Text = "💬 JOIN DISCORD"
-DiscordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-DiscordButton.TextScaled = true
-DiscordButton.Font = Enum.Font.GothamBold
-DiscordButton.BorderSizePixel = 0
-DiscordButton.Parent = MainFrame
-local DiscordCorner = Instance.new("UICorner")
-DiscordCorner.CornerRadius = UDim.new(0, 12)
-DiscordCorner.Parent = DiscordButton
+-- TextBox for precise numbers (0.01 to 20)
+local inputBox = Instance.new("TextBox")
+inputBox.Size = UDim2.new(0.8, 0, 0, 40)
+inputBox.Position = UDim2.new(0.1, 0, 0, 100)
+inputBox.BackgroundColor3 = Color3.fromRGB(20, 30, 45)
+inputBox.Font = Enum.Font.Code
+inputBox.PlaceholderText = "Enter 0.01 - 20"
+inputBox.Text = "2"
+inputBox.TextColor3 = Color3.fromRGB(0, 255, 204)
+inputBox.TextSize = 16
+inputBox.Parent = mainFrame
 
--- Current Size Display
-local SizeLabel = Instance.new("TextLabel")
-SizeLabel.Size = UDim2.new(0.8, 0, 0, 50)
-SizeLabel.Position = UDim2.new(0.1, 0, 0, 150)
-SizeLabel.BackgroundTransparency = 1
-SizeLabel.Text = "Current Hitbox: 1.00x"
-SizeLabel.TextColor3 = Color3.fromRGB(200, 230, 255)
-SizeLabel.TextScaled = true
-SizeLabel.Font = Enum.Font.GothamMedium
-SizeLabel.Parent = MainFrame
+local boxCorner = Instance.new("UICorner")
+boxCorner.CornerRadius = UDim.new(0, 8)
+boxCorner.Parent = inputBox
 
--- Slider (for smooth control)
-local SliderFrame = Instance.new("Frame")
-SliderFrame.Size = UDim2.new(0.8, 0, 0, 8)
-SliderFrame.Position = UDim2.new(0.1, 0, 0, 220)
-SliderFrame.BackgroundColor3 = Color3.fromRGB(40, 60, 100)
-SliderFrame.BorderSizePixel = 0
-SliderFrame.Parent = MainFrame
-local SliderCorner = Instance.new("UICorner")
-SliderCorner.CornerRadius = UDim.new(0, 4)
-SliderCorner.Parent = SliderFrame
-
-local SliderFill = Instance.new("Frame")
-SliderFill.Size = UDim2.new(0.5, 0, 1, 0)
-SliderFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-SliderFill.BorderSizePixel = 0
-SliderFill.Parent = SliderFrame
-local FillCorner = Instance.new("UICorner")
-FillCorner.CornerRadius = UDim.new(0, 4)
-FillCorner.Parent = SliderFill
-
-local SliderButton = Instance.new("TextButton")
-SliderButton.Size = UDim2.new(0, 25, 0, 25)
-SliderButton.Position = UDim2.new(0.5, -12, 0, -8)
-SliderButton.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
-SliderButton.Text = ""
-SliderButton.BorderSizePixel = 0
-SliderButton.Parent = MainFrame
-local SliderBtnCorner = Instance.new("UICorner")
-SliderBtnCorner.CornerRadius = UDim.new(1, 0)
-SliderBtnCorner.Parent = SliderButton
-
--- Glow ring on slider
-local SliderGlow = Instance.new("Frame")
-SliderGlow.Size = UDim2.new(1.6, 0, 1.6, 0)
-SliderGlow.Position = UDim2.new(-0.3, 0, -0.3, 0)
-SliderGlow.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-SliderGlow.BackgroundTransparency = 0.7
-SliderGlow.BorderSizePixel = 0
-SliderGlow.Parent = SliderButton
-local SliderGlowCorner = Instance.new("UICorner")
-SliderGlowCorner.CornerRadius = UDim.new(1, 0)
-SliderGlowCorner.Parent = SliderGlow
-
--- Value input field
-local ValueBox = Instance.new("TextBox")
-ValueBox.Size = UDim2.new(0.3, 0, 0, 40)
-ValueBox.Position = UDim2.new(0.35, 0, 0, 250)
-ValueBox.BackgroundColor3 = Color3.fromRGB(15, 30, 60)
-ValueBox.Text = "1.00"
-ValueBox.TextColor3 = Color3.fromRGB(0, 200, 255)
-ValueBox.TextScaled = true
-ValueBox.Font = Enum.Font.GothamBold
-ValueBox.ClearTextOnFocus = false
-ValueBox.Parent = MainFrame
-local ValueCorner = Instance.new("UICorner")
-ValueCorner.CornerRadius = UDim.new(0, 10)
-ValueCorner.Parent = ValueBox
-local ValueStroke = Instance.new("UIStroke")
-ValueStroke.Color = Color3.fromRGB(0, 150, 255)
-ValueStroke.Thickness = 1
-ValueStroke.Parent = ValueBox
-
--- Set Button
-local SetButton = Instance.new("TextButton")
-SetButton.Size = UDim2.new(0.3, 0, 0, 40)
-SetButton.Position = UDim2.new(0.35, 0, 0, 305)
-SetButton.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
-SetButton.Text = "APPLY"
-SetButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SetButton.TextScaled = true
-SetButton.Font = Enum.Font.GothamBold
-SetButton.BorderSizePixel = 0
-SetButton.Parent = MainFrame
-local SetCorner = Instance.new("UICorner")
-SetCorner.CornerRadius = UDim.new(0, 12)
-SetCorner.Parent = SetButton
-
--- Preset Buttons
-local Presets = {"0.01", "0.5", "1", "2", "5", "10", "20"}
-local PresetFrame = Instance.new("Frame")
-PresetFrame.Size = UDim2.new(0.9, 0, 0, 50)
-PresetFrame.Position = UDim2.new(0.05, 0, 0, 360)
-PresetFrame.BackgroundTransparency = 1
-PresetFrame.Parent = MainFrame
-
-local function updateHitbox(value)
-    local clamped = math.clamp(value, 0.01, 20)
-    local rounded = math.round(clamped * 100) / 100
-    
-    -- Update Humanoid's hitbox (affects character size scaling)
-    if Humanoid and Character then
-        -- Scale the character's size
-        local currentSize = Character.PrimaryPart and Character.PrimaryPart.Size or Vector3.new(2, 2, 1)
-        local baseSize = Vector3.new(2, 2, 1)
-        local scale = rounded / 1.0
-        -- Adjust Hitbox via Humanoid's WalkSpeed and JumpPower are unaffected
-        -- We scale the character's parts for visual + hitbox effect
-        for _, part in ipairs(Character:GetChildren()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                -- Store original size if not already stored
-                if not part:GetAttribute("OriginalSize") then
-                    part:SetAttribute("OriginalSize", part.Size)
-                end
-                local origSize = part:GetAttribute("OriginalSize")
-                if origSize then
-                    part.Size = origSize * scale
-                end
-            end
-        end
-        -- HumanoidRootPart special handling (main hitbox)
-        local rootPart = Character:FindFirstChild("HumanoidRootPart")
-        if rootPart then
-            if not rootPart:GetAttribute("OriginalSize") then
-                rootPart:SetAttribute("OriginalSize", rootPart.Size)
-            end
-            local origSize = rootPart:GetAttribute("OriginalSize")
-            if origSize then
-                rootPart.Size = origSize * scale
-            end
-        end
-    end
-    
-    -- Update UI
-    SizeLabel.Text = "Current Hitbox: " .. string.format("%.2f", rounded) .. "x"
-    SliderFill.Size = UDim2.new((rounded - 0.01) / 19.99, 0, 1, 0)
-    SliderButton.Position = UDim2.new((rounded - 0.01) / 19.99, -12, 0, -8)
-    ValueBox.Text = string.format("%.2f", rounded)
-end
-
--- Slider dragging
-local dragging = false
-SliderButton.MouseButton1Down:Connect(function()
-    dragging = true
-end)
-Mouse.Button1Up:Connect(function()
-    dragging = false
-end)
-Mouse.Move:Connect(function()
-    if dragging then
-        local relativeX = (Mouse.X - SliderFrame.AbsolutePosition.X) / SliderFrame.AbsoluteSize.X
-        local clamped = math.clamp(relativeX, 0, 1)
-        local value = 0.01 + (clamped * 19.99)
-        updateHitbox(value)
-    end
-end)
-
--- Set Button
-SetButton.MouseButton1Click:Connect(function()
-    local val = tonumber(ValueBox.Text)
-    if val then
-        updateHitbox(val)
-    end
-end)
-
--- Value Box focus
-ValueBox.FocusLost:Connect(function()
-    local val = tonumber(ValueBox.Text)
-    if val then
-        updateHitbox(val)
-    else
-        ValueBox.Text = "1.00"
-    end
-end)
-
--- Preset buttons
-for i, preset in ipairs(Presets) do
+-- Function to create stylized buttons
+local function createButton(text, yPos, color)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.12, 0, 1, 0)
-    btn.Position = UDim2.new((i-1) * 0.14, 0, 0, 0)
-    btn.BackgroundColor3 = Color3.fromRGB(20, 50, 80)
-    btn.Text = preset
-    btn.TextColor3 = Color3.fromRGB(150, 220, 255)
-    btn.TextScaled = true
-    btn.Font = Enum.Font.GothamMedium
-    btn.BorderSizePixel = 0
-    btn.Parent = PresetFrame
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 8)
-    btnCorner.Parent = btn
+    btn.Size = UDim2.new(0.8, 0, 0, 40)
+    btn.Position = UDim2.new(0.1, 0, 0, yPos)
+    btn.BackgroundColor3 = color
+    btn.Font = Enum.Font.Code
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 16
+    btn.Parent = mainFrame
     
-    btn.MouseButton1Click:Connect(function()
-        updateHitbox(tonumber(preset))
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = btn
+    
+    local uiScale = Instance.new("UIScale")
+    uiScale.Scale = 1
+    uiScale.Parent = btn
+    
+    btn.MouseEnter:Connect(function()
+        TweenService:Create(uiScale, TweenInfo.new(0.2), {Scale = 1.05}):Play()
     end)
+    btn.MouseLeave:Connect(function()
+        TweenService:Create(uiScale, TweenInfo.new(0.2), {Scale = 1}):Play()
+    end)
+    
+    return btn
 end
 
--- Discord Button
-DiscordButton.MouseButton1Click:Connect(function()
-    setclipboard and setclipboard("https://discord.com/invite/CWYQqnEMh")
-    -- Open in browser
-    if syn and syn.request then
-        syn.request({
-            Url = "https://discord.com/invite/CWYQqnEMh",
-            Method = "GET"
-        })
-    elseif game:GetService("GuiService"):OpenBrowserWindow then
-        game:GetService("GuiService"):OpenBrowserWindow("https://discord.com/invite/CWYQqnEMh")
-    else
-        -- Fallback: show text
-        local notice = Instance.new("TextLabel")
-        notice.Size = UDim2.new(0.8, 0, 0, 50)
-        notice.Position = UDim2.new(0.1, 0, 0.7, 0)
-        notice.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-        notice.BackgroundTransparency = 0.3
-        notice.Text = "Discord: https://discord.com/invite/CWYQqnEMh"
-        notice.TextColor3 = Color3.fromRGB(255, 255, 255)
-        notice.TextScaled = true
-        notice.Font = Enum.Font.GothamMedium
-        notice.Parent = ScreenGui
-        game:GetService("Debris"):AddItem(notice, 3)
+local applyBtn = createButton("APPLY HITBOX", 155, Color3.fromRGB(0, 180, 140))
+local discordBtn = createButton("COPY DISCORD LINK", 210, Color3.fromRGB(88, 101, 242))
+
+-- Read-only box for Discord link copying
+local discordBox = Instance.new("TextBox")
+discordBox.Size = UDim2.new(0.8, 0, 0, 35)
+discordBox.Position = UDim2.new(0.1, 0, 0, 265)
+discordBox.BackgroundColor3 = Color3.fromRGB(15, 20, 35)
+discordBox.Font = Enum.Font.Code
+discordBox.Text = "https://discord.com"
+discordBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+discordBox.TextSize = 12
+discordBox.ClearTextOnFocus = false
+discordBox.Parent = mainFrame
+
+local dCorner = Instance.new("UICorner")
+dCorner.CornerRadius = UDim.new(0, 6)
+dCorner.Parent = discordBox
+
+-- Isolated Hitbox Expansion (Only expands HumanoidRootPart without changing visual body scale)
+applyBtn.MouseButton1Click:Connect(function()
+    local num = tonumber(inputBox.Text)
+    if num then
+        if num < 0.01 then num = 0.01 end
+        if num > 20 then num = 20 end
+        valueDisplay.Text = "Hitbox Size: " .. tostring(num)
+        
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then
+            local hrp = char.HumanoidRootPart
+            hrp.Size = Vector3.new(num, num, num)
+            hrp.Transparency = 0.7 -- Slight visibility to see your range area, set to 1 for fully invisible
+            hrp.CanCollide = false  -- Prevents getting stuck or floating due to oversized block
+        end
     end
 end)
 
--- Animation loop (futuristic pulsing)
-game:GetService("RunService").RenderStepped:Connect(function()
-    local time = tick()
-    -- Pulsing glow
-    Glow.BackgroundTransparency = 0.7 + math.sin(time * 2) * 0.15
-    -- Slider glow pulse
-    SliderGlow.BackgroundTransparency = 0.5 + math.sin(time * 3) * 0.3
-    -- Title shimmer
-    Title.TextColor3 = Color3.fromRGB(
-        100 + math.sin(time * 1.5) * 50,
-        200 + math.sin(time * 1.5 + 1) * 50,
-        255
-    )
+-- Re-apply size when character character respawns
+player.CharacterAdded:Connect(function(char)
+    local num = tonumber(inputBox.Text)
+    if num and num ~= 2 then
+        local hrp = char:WaitForChild("HumanoidRootPart", 5)
+        if hrp then
+            hrp.Size = Vector3.new(num, num, num)
+            hrp.Transparency = 0.7
+            hrp.CanCollide = false
+        end
+    end
 end)
 
--- Initial setup
-updateHitbox(1.0)
-
--- Credit flash animation
-game:GetService("TweenService"):Create(
-    CreditLabel,
-    TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-    {TextColor3 = Color3.fromRGB(200, 255, 255)}
-):Play()
-
--- Character respawn handling
-Player.CharacterAdded:Connect(function(newChar)
-    Character = newChar
-    Humanoid = Character:WaitForChild("Humanoid")
-    wait(0.5)
-    updateHitbox(tonumber(ValueBox.Text) or 1.0)
+-- Discord Link Helper
+discordBtn.MouseButton1Click:Connect(function()
+    discordBox:CaptureFocus()
+    discordBox.CursorPosition = #discordBox.Text + 1
+    discordBox.SelectionStart = 1
+    valueDisplay.Text = "Link selected! Press Ctrl+C"
 end)
 
-print("Hitbox Changer loaded! Made by Kevvscripts")
+-- Right Shift Toggle Logic with Animation
+local guiVisible = true
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.RightShift then
+        guiVisible = not guiVisible
+        
+        local targetSize = guiVisible and UDim2.new(0, 320, 0, 380) or UDim2.new(0, 0, 0, 0)
+        local targetTransparency = guiVisible and 0 or 1
+        
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        
+        TweenService:Create(mainFrame, tweenInfo, {Size = targetSize}):Play()
+        TweenService:Create(uiStroke, tweenInfo, {Transparency = targetTransparency}):Play()
+        
+        for _, child in ipairs(mainFrame:GetChildren()) do
+            if child:IsA("TextLabel") or child:IsA("TextBox") or child:IsA("TextButton") then
+                TweenService:Create(child, tweenInfo, {BackgroundTransparency = guiVisible and (child:IsA("TextLabel") and 1 or 0) or 1}):Play()
+                if not child:IsA("UICorner") and not child:IsA("UIStroke") and not child:IsA("UIScale") then
+                    child.Visible = guiVisible
+                end
+            end
+        end
+    end
+end)
